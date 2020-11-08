@@ -10,10 +10,18 @@ use ctor::ctor;
 mod players;
 use players::{Player, Enemy};
 
+mod norecoil;
+use norecoil::NoRecoilSpread;
+
+mod infiniteammo;
+use infiniteammo::InfiniteAmmo;
+
 /// The main struct containing all the information and subcomponents of this hack
 struct Ac_Hack {
     /// This is the player we are playing as
-    player: Player
+    player: Player,
+    norecoil: NoRecoilSpread,
+    infinite_ammo: InfiniteAmmo,
 }
 
 
@@ -22,12 +30,10 @@ impl Ac_Hack {
         // get a handle to the current process
         let process = Process::current().unwrap();
 
-        // load the Self, the player we are playing as
-        let player = Player::player1(&process);
-
         Ac_Hack {
-            player: player
-            
+            player: Player::player1(&process),
+            norecoil: NoRecoilSpread::new(&process),
+            infinite_ammo: InfiniteAmmo::new(&process)
         }
     }
 
@@ -36,9 +42,17 @@ impl Ac_Hack {
         // This will initialize everything there is
         let mut hack = Self::new();
 
+        // enable no recoil by default
+        hack.norecoil.enable();
+
+        // enable infinite ammo
+        hack.infinite_ammo.enable();
+
+        // set the ammo to a funny value
+        hack.player.set_ammo(1337);
+
         loop {
             hack.player.set_health(1337);
-            hack.player.set_ammo(1337);
         }
     }
 }
