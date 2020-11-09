@@ -44,6 +44,8 @@ impl AcHack {
         // enable no recoil by default
         hack.aimbot.norecoil_spread.enable();
 
+        hack.aimbot.autoshoot.enable();
+
         // enable infinite ammo
         hack.player.infinite_ammo.enable();
 
@@ -64,8 +66,8 @@ impl AcHack {
 
             let self_pos = hack.player.get_xyz();
             println!("self position = {} {} {}", self_pos[0], self_pos[1], self_pos[2]);
-            //let self_view = hack.player.get_view();
-            //println!("self position = {} {} {}", self_view[0], self_view[1], self_view[2]);
+            let self_view = hack.player.get_view();
+            println!("self view = {} {} {}", self_view[0], self_view[1], self_view[2]);
             for enem in enems.iter() {
                 let pos = enem.get_pos(&mut mem);
 

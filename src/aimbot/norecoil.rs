@@ -24,6 +24,7 @@ impl NoRecoilSpread {
     }
 
     pub fn enable(&mut self) {
+        println!("recoil addr=0x{:x}", self.patch_addr);
         // nothing to do
         if self.enabled {
             return

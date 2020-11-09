@@ -7,10 +7,17 @@ use norecoil::NoRecoilSpread;
 mod enemy;
 use enemy::Enemy;
 
+mod autoshoot;
+use autoshoot::AutoShoot;
+
+use crate::player::Player;
+
 const PLAYERS_OFF: usize = 0x128330;
 
 pub struct AimBot {
+    player: Player,
     pub norecoil_spread: NoRecoilSpread,
+    pub autoshoot: AutoShoot,
     enabled: bool,
     enemies_base: usize,
     mem: Internal,
@@ -19,7 +26,10 @@ pub struct AimBot {
 
 impl AimBot {
     pub fn new(process: &Process) -> AimBot {
+        let mut player = Player::new(process);
         AimBot {
+            autoshoot: AutoShoot::new(process, player.base),
+            player: player,
             norecoil_spread: NoRecoilSpread::new(process),
             enabled: false,
             enemies_base: process.module("linux_64_client").unwrap().base + PLAYERS_OFF,
@@ -27,12 +37,11 @@ impl AimBot {
         }
     }
 
-    pub fn enable(mut self) -> Self {
+    pub fn enable(&mut self) {
         self.enabled = true;
-        self
     }
 
-    pub fn disable(mut self) {
+    pub fn disable(&mut self) {
         self.enabled = false;
     }
 

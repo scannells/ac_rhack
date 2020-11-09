@@ -21,8 +21,9 @@ const GUNSELECT_OFF: usize = 0x120;
 const PLAYER_POS_OFF: usize = 0x8;
 const PLAYER_Y_OFF: usize = 0x8 + 0x8;
 
-const PLAYER_VIEW_OFF: usize = 0x33440c;
+const PLAYER_VIEW_OFF: usize = 0x13745c;
 
+const PLAYER_ATTACKING_OFF: usize = 0x23c;
 
 pub struct Player {
 	pub base: usize,
@@ -31,6 +32,7 @@ pub struct Player {
 
 	pub god_mode: GodMode,
 	pub infinite_ammo: InfiniteAmmo,
+
 }
 
 
@@ -50,13 +52,14 @@ impl Player {
 		// There is a global variable called "player1", which is a pointer
 		// to the actual, dynamically allocated player struct.
 		// In order to obtain the address of the player, just dereference the global pointer
-		let player1_ptr = process.module("linux_64_client").unwrap().base + PLAYER1_OFF;
+		let ac_base  = process.module("linux_64_client").unwrap().base;
+		let player1_ptr = ac_base + PLAYER1_OFF;
 		let mut mem: Internal = process.get_mem_access().unwrap();
 		let mut player1_base: u64 = mem.read(player1_ptr).unwrap();
 
 		// worldpos is another global variable. It contains the view XYZ coordinates of the
 		// current user and can thus be used to create an aimbot
-		let worldpos = process.module("linux_64_client").unwrap().base + PLAYER_VIEW_OFF;
+		let worldpos = ac_base + PLAYER_VIEW_OFF;
 
 		Player::new_at_addr(process, player1_base as usize, worldpos, mem)
 	}
@@ -117,6 +120,14 @@ impl Player {
 	pub fn aim(&mut self)  {
 		self.mem.write(self.worldpos + 8, 5.0 as f32).unwrap();
 		self.mem.write(self.worldpos, 260.0 as f32).unwrap();
+	}
+
+	pub fn shoot(&mut self) {
+		self.mem.write(self.base + PLAYER_ATTACKING_OFF, 1 as u8);
+	}
+
+	pub fn stop_shoot(&mut self) {
+		self.mem.write(self.base + PLAYER_ATTACKING_OFF, 0 as u8);
 	}
 }
 
