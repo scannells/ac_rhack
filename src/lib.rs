@@ -7,44 +7,32 @@ use lpmanipulator::{ProcessErrors, Process};
 extern crate ctor;
 use ctor::ctor;
 
-mod players;
-use players::{Player, Enemy};
+mod player;
+use player::{Player, Enemy};
 
 mod norecoil;
 use norecoil::NoRecoilSpread;
 
-mod infiniteammo;
-use infiniteammo::InfiniteAmmo;
-
 mod helpers;
-
-mod godmode;
-use godmode::GodMode;
 
 
 
 /// The main struct containing all the information and subcomponents of this hack
-struct Ac_Hack {
+struct AcHack {
     /// This is the player we are playing as
     player: Player,
     norecoil: NoRecoilSpread,
-    infinite_ammo: InfiniteAmmo,
-    god_mode: GodMode,
 }
 
 
-impl Ac_Hack {
+impl AcHack {
     fn new() -> Self {
         // get a handle to the current process
         let process = Process::current().unwrap();
 
-        let mut player = Player::player1(&process);
-
-        Ac_Hack {
-            god_mode: GodMode::new(&process, &player),
-            player: player,
+        AcHack {
+            player: Player::new(&process),
             norecoil: NoRecoilSpread::new(&process),
-            infinite_ammo: InfiniteAmmo::new(&process)
         }
     }
 
@@ -57,10 +45,10 @@ impl Ac_Hack {
         hack.norecoil.enable();
 
         // enable infinite ammo
-        hack.infinite_ammo.enable();
+        hack.player.infinite_ammo.enable();
 
         // enable god mode
-        hack.god_mode.enable();
+        hack.player.god_mode.enable();
 
         // set the ammo to a funny value
         hack.player.set_ammo(1337);
@@ -93,7 +81,7 @@ fn load() {
 
 
         // Load the cheat and run it. We won't return from here
-        Ac_Hack::run();
+        AcHack::run();
     });
 
 

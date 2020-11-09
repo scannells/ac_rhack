@@ -3,9 +3,9 @@ use core::ffi::c_void;
 extern crate lpmanipulator;
 use lpmanipulator::{Process, MemoryManipulator, ProcMem};
 
-use super::helpers::{get_executable_map, gen_shellcode};
+use crate::helpers::{get_executable_map, gen_shellcode};
 
-use super::players::Player;
+use super::Player;
 
 /* Enabling gode mode works by patching the instruction that writes to the health of a
  * player. We can't just add a NOP here, as that would mean no one can die anymore.
@@ -42,14 +42,14 @@ pub struct GodMode {
 }
 
 impl GodMode {
-    pub fn new(process: &Process, player: &Player) -> Self {
+    pub fn new(process: &Process, player_base: usize) -> Self {
         GodMode {
             patch_addr: process.module("linux_64_client").unwrap().base + DAMAGE_PATCH_OFF,
             enabled: false,
             saved_instr: None,
             mem: process.get_mem_access().unwrap(),
             page: None,
-            player_base: player.base,
+            player_base: player_base,
             patch_shellcode: None,
         }
     }

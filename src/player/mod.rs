@@ -1,6 +1,12 @@
 extern crate lpmanipulator;
 use lpmanipulator::{Process, Internal, MemoryManipulator};
 
+mod godmode;
+use godmode::GodMode;
+
+mod infiniteammo;
+use infiniteammo::InfiniteAmmo;
+
 /// offset to the player1 pointer from the base of the loaded game
 const PLAYER1_OFF: usize = 0x128328;
 
@@ -20,24 +26,30 @@ const PLAYER_Y_OFF: usize = 0x8 + 0x8;
 
 const PLAYER_VIEW_OFF: usize = 0x33440c;
 
+
 pub struct Player {
 	pub base: usize,
 	worldpos: usize,
 	mem: Internal,
+
+	pub god_mode: GodMode,
+	pub infinite_ammo: InfiniteAmmo,
 }
 
 
 impl Player {
-	fn new_at_addr(addr: usize, worldpos: usize, mem: Internal) -> Self
+	fn new_at_addr(process: &Process, addr: usize, worldpos: usize, mem: Internal) -> Self
 	{
 		Player {
-			base: addr,
+			base: addr.clone(),
 			worldpos: worldpos,
-			mem: mem
+			mem: mem,
+			god_mode: GodMode::new(process, addr),
+			infinite_ammo: InfiniteAmmo::new(process),
 		}
 	}
 
-	pub fn player1(process: &Process) -> Self  {
+	pub fn new(process: &Process) -> Self  {
 		// There is a global variable called "player1", which is a pointer
 		// to the actual, dynamically allocated player struct.
 		// In order to obtain the address of the player, just dereference the global pointer
@@ -49,7 +61,7 @@ impl Player {
 		// current user and can thus be used to create an aimbot
 		let worldpos = process.module("linux_64_client").unwrap().base + PLAYER_VIEW_OFF;
 
-		Player::new_at_addr(player1_base as usize, worldpos, mem)
+		Player::new_at_addr(process, player1_base as usize, worldpos, mem)
 	}
 
 	pub fn get_health(&mut self) -> u32  {
