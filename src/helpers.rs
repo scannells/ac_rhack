@@ -52,7 +52,6 @@ pub fn gen_shellcode(shellcode: String) -> Vec<u8>{
         .expect("This hack requires NASM to gen shellcode dynamically. Please install it");
 
 
-    Command::new("cat").arg("/tmp/ac_hack_asm.S").status().expect("Failed to cat file");
     // delete the assembly file
     remove_file(Path::new("/tmp/ac_hack_asm.S")).expect("Could not clean shellcode file");
 
@@ -66,6 +65,5 @@ pub fn gen_shellcode(shellcode: String) -> Vec<u8>{
 
     // delete the assembled code
     remove_file(Path::new("/tmp/ac_hack_asm")).expect("Could not clean assembled file");
-    println!("read {} bytes from asm file", res.len());
     res
 }

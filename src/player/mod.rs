@@ -10,9 +10,6 @@ use infiniteammo::InfiniteAmmo;
 /// offset to the player1 pointer from the base of the loaded game
 const PLAYER1_OFF: usize = 0x128328;
 
-/// offset to the vector of pointer to all other players
-const PLAYERS_OFF: usize = 0x128330;
-
 // there can be only 32 players in a match
 const MAX_OTHER_PLAYER: usize = 32;
 
