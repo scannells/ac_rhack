@@ -1,5 +1,4 @@
-extern crate lpmanipulator;
-use lpmanipulator::{Process, Internal, MemoryManipulator};
+use crate::process::{Process, Internal, MemoryManipulator};
 
 mod godmode;
 use godmode::GodMode;
@@ -54,8 +53,8 @@ impl Player {
 		// In order to obtain the address of the player, just dereference the global pointer
 		let ac_base  = process.module("linux_64_client").unwrap().base;
 		let player1_ptr = ac_base + PLAYER1_OFF;
-		let mut mem: Internal = process.get_mem_access().unwrap();
-		let mut player1_base: u64 = mem.read(player1_ptr).unwrap();
+		let mut mem: Internal = process.get_mem_access().expect("Could not create memory manager");
+		let mut player1_base: u64 = mem.read(player1_ptr);
 
 		// worldpos is another global variable. It contains the view XYZ coordinates of the
 		// current user and can thus be used to create an aimbot
@@ -64,43 +63,27 @@ impl Player {
 		Player::new_at_addr(process, player1_base as usize, worldpos, mem)
 	}
 
-	pub fn get_health(&mut self) -> u32  {
-		let health: u32 = self.mem.read(self.base + HEALTH_OFF).unwrap();
-		health
-	}
 
 	/// sets the health of the player to an arbitrary value
 	pub fn set_health(&mut self, health: u32)  {
-		self.mem.write(self.base + HEALTH_OFF, health).unwrap();
+		self.mem.write(self.base + HEALTH_OFF, health);
 		println!("health address: 0x{:x}", self.base + HEALTH_OFF);
 	}
 
-	pub fn get_health_addr(&self) -> usize {
-		self.base + HEALTH_OFF
-	}
-
-	/// sets the ammo off the current weapon
-	pub fn get_ammo(&mut self) -> u32  {
-		// the playerstate keeps an index of the current weapon in the ammo array. It is an
-		// int so multiply by 4
-		let gun: u32 = self.mem.read(self.base + GUNSELECT_OFF).unwrap();
-		let ammo: u32 = self.mem.read(self.base + AMMO_OFF + (gun * 4) as usize).unwrap();
-		ammo
-	}
 
 	/// sets the ammo off the current weapon
 	pub fn set_ammo(&mut self, ammo: u32)  {
 		// the playerstate keeps an index of the current weapon in the ammo array. It is an
 		// int so multiply by 4
-		let gun: u32 = self.mem.read(self.base + GUNSELECT_OFF).unwrap();
-		self.mem.write(self.base + AMMO_OFF + (gun * 4) as usize, ammo).unwrap();
+		let gun: u32 = self.mem.read(self.base + GUNSELECT_OFF);
+		self.mem.write(self.base + AMMO_OFF + (gun * 4) as usize, ammo);
 		println!("ammo addr: 0x{:x}", self.base + AMMO_OFF + (gun * 4) as usize);
 	}
 
 	pub fn get_xyz(&mut self) -> [f32; 3]  {
 		let mut head: [f32; 3] = [0.0; 3];
 		for i in 0..3 {
-			head[i] = self.mem.read(self.base + PLAYER_POS_OFF + i * 4).unwrap();
+			head[i] = self.mem.read(self.base + PLAYER_POS_OFF + i * 4);
 		}
 		head
 	}
@@ -108,18 +91,14 @@ impl Player {
 	pub fn get_view(&mut self) -> [f32; 3]  {
 		let mut head: [f32; 3] = [0.0; 3];
 		for i in 0..3 {
-			head[i] = self.mem.read(self.worldpos + i * 4).unwrap();
+			head[i] = self.mem.read(self.worldpos + i * 4);
 		}
 		head
 	}
 
-	pub fn fly(&mut self)  {
-		self.mem.write(self.base + PLAYER_Y_OFF, 18.0 as f32).unwrap();
-	}
-
 	pub fn aim(&mut self)  {
-		self.mem.write(self.worldpos + 8, 5.0 as f32).unwrap();
-		self.mem.write(self.worldpos, 260.0 as f32).unwrap();
+		self.mem.write(self.worldpos + 8, 5.0 as f32);
+		self.mem.write(self.worldpos, 260.0 as f32);
 	}
 
 	pub fn shoot(&mut self) {

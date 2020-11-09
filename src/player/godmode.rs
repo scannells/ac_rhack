@@ -1,7 +1,6 @@
 use core::ffi::c_void;
 
-extern crate lpmanipulator;
-use lpmanipulator::{Process, MemoryManipulator, ProcMem};
+use crate::{Process, MemoryManipulator, ProcMem};
 
 use crate::helpers::{get_executable_map, gen_shellcode};
 
@@ -47,7 +46,7 @@ impl GodMode {
             patch_addr: process.module("linux_64_client").unwrap().base + DAMAGE_PATCH_OFF,
             enabled: false,
             saved_instr: None,
-            mem: process.get_mem_access().unwrap(),
+            mem: process.get_mem_access().expect("This hack requires access to /proc/self/mem"),
             page: None,
             player_base: player_base,
             patch_shellcode: None,
@@ -141,7 +140,7 @@ impl GodMode {
             // before overwriting the patch address, we need to save it
             let mut saved: [u8; HOOK_SIZE] = [0; HOOK_SIZE];
             for i in 0..saved.len() {
-                saved[i] = self.mem.read(self.patch_addr).unwrap();
+                saved[i] = self.mem.read(self.patch_addr);
             }
 
             self.saved_instr = Some(saved);
@@ -149,7 +148,7 @@ impl GodMode {
         }
 
         // patch the instruction with with the shellcode that jumps to the function hook
-        self.mem.write_n(self.patch_addr, &self.patch_shellcode.as_ref().unwrap()).unwrap();
+        self.mem.write_n(self.patch_addr, &self.patch_shellcode.as_ref().unwrap());
         println!("patching address at 0x{:x} with len {}", self.patch_addr, &self.patch_shellcode.as_ref().unwrap().len());
 
         // keep a record that this hook is enabled

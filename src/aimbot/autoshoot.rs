@@ -1,7 +1,6 @@
 use core::ffi::c_void;
 
-extern crate lpmanipulator;
-use lpmanipulator::{Process, MemoryManipulator, ProcMem};
+use crate::{Process, MemoryManipulator, ProcMem};
 
 use crate::helpers::{get_executable_map, gen_shellcode};
 
@@ -120,7 +119,7 @@ impl AutoShoot {
         }
 
         // patch the instruction with with the shellcode that jumps to the function hook
-        self.mem.write_n(self.patch_addr, &self.patch_shellcode.as_ref().unwrap()).unwrap();
+        self.mem.write_n(self.patch_addr, &self.patch_shellcode.as_ref().unwrap());
         println!("patching address at 0x{:x} with len {} (for autoshoot)", self.patch_addr, &self.patch_shellcode.as_ref().unwrap().len());
 
         // keep a record that this hook is enabled

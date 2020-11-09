@@ -5,8 +5,7 @@
  * the file enemies.cpp is a C wrapper that fills an array of pointers to enemies for us
  */
 
-extern crate lpmanipulator;
-use lpmanipulator::{Process, Internal, MemoryManipulator};
+use crate::{Process, Internal, MemoryManipulator};
 
 
 const MAX_PLAYERS: usize = 32;
@@ -41,7 +40,7 @@ impl Enemy {
 
         // fill the vector of enemies
         for i in 0..vec_of_enems.elements {
-            let enem_addr: u64 = mem.read(vec_of_enems.enemy_addresses + (i * 8) as usize).unwrap();
+            let enem_addr: u64 = mem.read(vec_of_enems.enemy_addresses + (i * 8) as usize);
 
             // sometimes pointers are NULL
             if enem_addr == 0x0 {
@@ -61,7 +60,7 @@ impl Enemy {
             return head;
         }
 		for i in 0..3 {
-			head[i] = mem.read(self.base + PLAYER_POS_OFF + i * 4).unwrap();
+			head[i] = mem.read(self.base + PLAYER_POS_OFF + i * 4);
 		}
 		head
     }

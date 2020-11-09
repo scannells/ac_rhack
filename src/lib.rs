@@ -1,8 +1,8 @@
 use std::thread;
 use std::time::Duration;
 
-extern crate lpmanipulator;
-use lpmanipulator::{ProcessErrors, Process, Internal, MemoryManipulator};
+mod process;
+pub use process::*;
 
 extern crate ctor;
 use ctor::ctor;
@@ -58,23 +58,8 @@ impl AcHack {
 
         hack.player.set_health(1337);
 
-        let mut mem: Internal = Process::current().unwrap().get_mem_access().unwrap();
         loop {
-            thread::sleep(Duration::from_secs(2));
-            let enems = hack.aimbot.enemies();
-            println!("returned a vector of {} enemies", enems.len() );
 
-            let self_pos = hack.player.get_xyz();
-            println!("self position = {} {} {}", self_pos[0], self_pos[1], self_pos[2]);
-            let self_view = hack.player.get_view();
-            println!("self view = {} {} {}", self_view[0], self_view[1], self_view[2]);
-            for enem in enems.iter() {
-                let pos = enem.get_pos(&mut mem);
-
-                println!("enemy position = {} {} {}", pos[0], pos[1], pos[2]);
-
-            }
-            println!("\n\n");
         }
     }
 }

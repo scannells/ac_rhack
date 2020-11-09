@@ -1,5 +1,4 @@
-extern crate lpmanipulator;
-use lpmanipulator::{Process, MemoryManipulator, ProcMem};
+use crate::{Process, MemoryManipulator, ProcMem};
 
 const AMMO_PATCH_OFF: usize = 0xbf50b;
 
@@ -19,7 +18,7 @@ impl InfiniteAmmo {
             patch_addr: process.module("linux_64_client").unwrap().base + AMMO_PATCH_OFF,
             enabled: false,
             saved_instr: None,
-            mem: process.get_mem_access().unwrap(),
+            mem: process.get_mem_access().expect("Failed to get access to /proc/self/mem")
         }
     }
 
@@ -33,13 +32,13 @@ impl InfiniteAmmo {
         // so that we can restore the code
         if !self.saved_instr.is_some() {
             self.saved_instr = Some({
-                self.mem.read(self.patch_addr).unwrap()
+                self.mem.read(self.patch_addr)
             });
         }
 
         // patch the instruction with 3 bytes of NOPs (1x 16 bytes and 1x 8 byte write)
-        self.mem.write(self.patch_addr, 0x90_90 as u16).unwrap();
-        self.mem.write(self.patch_addr + 2 as usize, 0x90 as u8).unwrap();
+        self.mem.write(self.patch_addr, 0x90_90 as u16);
+        self.mem.write(self.patch_addr + 2 as usize, 0x90 as u8);
 
         // keep a record that this hook is enabled
         self.enabled = true;

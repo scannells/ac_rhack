@@ -1,5 +1,4 @@
-extern crate lpmanipulator;
-use lpmanipulator::{Process, Internal, MemoryManipulator};
+use crate::process::{Process, Internal, MemoryManipulator};
 
 mod norecoil;
 use norecoil::NoRecoilSpread;

@@ -1,5 +1,4 @@
-extern crate lpmanipulator;
-use lpmanipulator::{Process, MemoryManipulator, ProcMem};
+use crate::{Process, MemoryManipulator, ProcMem};
 
 const RECOIL_PATCH_OFF: usize = 0xbd220;
 
@@ -34,12 +33,12 @@ impl NoRecoilSpread {
         // so that we can restore the code
         if !self.saved_instr.is_some() {
             self.saved_instr = Some({
-                self.mem.read(self.patch_addr).unwrap()
+                self.mem.read(self.patch_addr)
             });
         }
 
         // patch the instruction with a simple ret
-        self.mem.write(self.patch_addr, 0xc3 as u8).unwrap();
+        self.mem.write(self.patch_addr, 0xc3 as u8);
 
         // keep a record that this hook is enabled
         self.enabled = true;

@@ -8,8 +8,7 @@ use nix::sys::mman::{mmap, ProtFlags, MapFlags};
 
 use core::ffi::c_void;
 
-extern crate lpmanipulator;
-use lpmanipulator::ProcessErrors;
+use super::ProcessErrors;
 
 pub fn get_executable_map(size: usize) -> Result<*mut c_void, ProcessErrors> {
     let mut prot_flags = ProtFlags::empty();
