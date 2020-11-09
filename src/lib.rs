@@ -10,8 +10,8 @@ use ctor::ctor;
 mod player;
 use player::{Player, Enemy};
 
-mod norecoil;
-use norecoil::NoRecoilSpread;
+mod aimbot;
+use aimbot::AimBot;
 
 mod helpers;
 
@@ -21,7 +21,7 @@ mod helpers;
 struct AcHack {
     /// This is the player we are playing as
     player: Player,
-    norecoil: NoRecoilSpread,
+    aimbot: AimBot,
 }
 
 
@@ -32,7 +32,7 @@ impl AcHack {
 
         AcHack {
             player: Player::new(&process),
-            norecoil: NoRecoilSpread::new(&process),
+            aimbot: AimBot::new(&process),
         }
     }
 
@@ -42,7 +42,7 @@ impl AcHack {
         let mut hack = Self::new();
 
         // enable no recoil by default
-        hack.norecoil.enable();
+        hack.aimbot.norecoil_spread.enable();
 
         // enable infinite ammo
         hack.player.infinite_ammo.enable();
