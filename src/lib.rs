@@ -16,12 +16,20 @@ use norecoil::NoRecoilSpread;
 mod infiniteammo;
 use infiniteammo::InfiniteAmmo;
 
+mod helpers;
+
+mod godmode;
+use godmode::GodMode;
+
+
+
 /// The main struct containing all the information and subcomponents of this hack
 struct Ac_Hack {
     /// This is the player we are playing as
     player: Player,
     norecoil: NoRecoilSpread,
     infinite_ammo: InfiniteAmmo,
+    god_mode: GodMode,
 }
 
 
@@ -30,8 +38,11 @@ impl Ac_Hack {
         // get a handle to the current process
         let process = Process::current().unwrap();
 
+        let mut player = Player::player1(&process);
+
         Ac_Hack {
-            player: Player::player1(&process),
+            god_mode: GodMode::new(&process, &player),
+            player: player,
             norecoil: NoRecoilSpread::new(&process),
             infinite_ammo: InfiniteAmmo::new(&process)
         }
@@ -48,12 +59,16 @@ impl Ac_Hack {
         // enable infinite ammo
         hack.infinite_ammo.enable();
 
+        // enable god mode
+        hack.god_mode.enable();
+
         // set the ammo to a funny value
         hack.player.set_ammo(1337);
 
-        loop {
-            hack.player.set_health(1337);
-        }
+
+        hack.player.set_health(1337);
+
+        loop {}
     }
 }
 

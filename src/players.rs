@@ -21,7 +21,7 @@ const PLAYER_Y_OFF: usize = 0x8 + 0x8;
 const PLAYER_VIEW_OFF: usize = 0x33440c;
 
 pub struct Player {
-	base: usize,
+	pub base: usize,
 	worldpos: usize,
 	mem: Internal,
 }
@@ -57,8 +57,14 @@ impl Player {
 		health
 	}
 
+	/// sets the health of the player to an arbitrary value
 	pub fn set_health(&mut self, health: u32)  {
 		self.mem.write(self.base + HEALTH_OFF, health).unwrap();
+		println!("health address: 0x{:x}", self.base + HEALTH_OFF);
+	}
+
+	pub fn get_health_addr(&self) -> usize {
+		self.base + HEALTH_OFF
 	}
 
 	/// sets the ammo off the current weapon
