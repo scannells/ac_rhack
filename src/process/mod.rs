@@ -1,5 +1,5 @@
 
-
+use std::collections::HashMap;
 
 /**
  * Finds the assault cube process and returns information about it: base of the different sections, pid etc.
@@ -72,6 +72,10 @@ impl Process {
 
 	pub fn module(&self, module_name: &str) -> Result<Module, ProcessErrors> {
 		modules::get_module(self, module_name)
+	}
+
+	pub fn modules(&self) -> Result<HashMap<String, Module>, ProcessErrors> {
+		modules::parse_modules(self)
 	}
 
 	pub fn get_mem_access<M: MemoryManipulator>(&self) -> Result<M, MemoryError> {

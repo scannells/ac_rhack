@@ -97,7 +97,7 @@ impl GodMode {
               sub ebp, edx\n\
               ; save rbp in case the value is needed later for something else\n\
               push rbp\n\
-              mov ebp, 9001\n\
+              ;mov ebp, 9001\n\
               ; do the damage\n\
               sub    DWORD [rbx+0x110],ebp\n\
               pop rbp\n\
