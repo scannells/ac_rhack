@@ -9,7 +9,6 @@ mod instantion;
 mod memory;
 mod modules;
 mod helpers;
-use std::collections::HashMap;
 
 // export all public symbols of the sub modules
 pub use memory::*;

@@ -8,7 +8,7 @@ extern crate ctor;
 use ctor::ctor;
 
 mod player;
-use player::{Player, Enemy};
+use player::Player;
 
 mod aimbot;
 use aimbot::AimBot;
@@ -41,25 +41,21 @@ impl AcHack {
         // This will initialize everything there is
         let mut hack = Self::new();
 
-        // enable no recoil by default
-        hack.aimbot.norecoil_spread.enable();
+        hack.aimbot.toggle();
 
-        hack.aimbot.autoshoot.enable();
+        // enable no recoil by default
+        hack.aimbot.norecoil_spread.toggle();
+
+        hack.aimbot.autoshoot.toggle();
 
         // enable infinite ammo
-        hack.player.infinite_ammo.enable();
+        hack.player.infinite_ammo.toggle();
 
         // enable god mode
-        hack.player.god_mode.enable();
-
-        // set the ammo to a funny value
-        hack.player.set_ammo(1337);
-
-
-        hack.player.set_health(1337);
+        hack.player.god_mode.toggle();
 
         loop {
-
+            hack.aimbot.enemies();
         }
     }
 }

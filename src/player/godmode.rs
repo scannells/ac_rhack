@@ -4,8 +4,6 @@ use crate::{Process, MemoryManipulator, ProcMem};
 
 use crate::helpers::{get_executable_map, gen_shellcode};
 
-use super::Player;
-
 /* Enabling gode mode works by patching the instruction that writes to the health of a
  * player. We can't just add a NOP here, as that would mean no one can die anymore.
  * For this reason we must allocate an executable page where we write code that will

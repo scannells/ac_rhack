@@ -14,7 +14,6 @@ const MAX_OTHER_PLAYER: usize = 32;
 
 /// offsets from the playerent to fields we want to read / write
 const HEALTH_OFF: usize = 0x110;
-const ARMOR_OFF: usize = 0x114;
 const AMMO_OFF: usize = 0x150;
 const GUNSELECT_OFF: usize = 0x120;
 const PLAYER_POS_OFF: usize = 0x8;
@@ -108,8 +107,4 @@ impl Player {
 	pub fn stop_shoot(&mut self) {
 		self.mem.write(self.base + PLAYER_ATTACKING_OFF, 0 as u8);
 	}
-}
-
-pub struct Enemy {
-	base: usize
 }

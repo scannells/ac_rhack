@@ -44,6 +44,14 @@ impl AimBot {
         self.enabled = false;
     }
 
+    pub fn toggle(&mut self) {
+        if self.enabled {
+            self.disable();
+        } else {
+            self.enable();
+        }
+    }
+
     pub fn enemies(&mut self) -> Vec<Enemy> {
         Enemy::all(self.enemies_base, &mut self.mem)
     }

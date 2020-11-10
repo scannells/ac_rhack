@@ -38,7 +38,7 @@ pub fn gen_shellcode(shellcode: String) -> Vec<u8>{
 
     // write the shellcode to a file
     let mut asm_file = File::create("/tmp/ac_hack_asm.S").expect("Failed to write to /tmp");
-    asm_file.write_all(shellcode.as_bytes());
+    asm_file.write_all(shellcode.as_bytes()).expect("Failed to write assembly code to /tmp file");
 
     // assemble it
     Command::new("nasm")
