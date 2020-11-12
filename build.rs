@@ -30,4 +30,10 @@ fn main() {
     bindings
         .write_to_file(out_path.join("gl_bindings.rs"))
         .expect("Couldn't write bindings!");
+
+    println!("cargo:rerun-if-changed=src/aimbot/bot_trampoline.cpp");
+    cc::Build::new()
+        .cpp(true)
+        .file("src/aimbot/bot_trampoline.cpp")
+        .compile("bot_trampoline");
 }
