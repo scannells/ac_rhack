@@ -2,8 +2,8 @@
 use super::*;
 
 use crate::{
-    Enemy,
-    Player
+    Player,
+    InternalMemory
 };
 
 
@@ -18,9 +18,7 @@ const PLAYER_ASPECT_RATIO: f32 = PLAYER_HEIGHT / PLAYER_WIDTH;
 pub struct ESPBox {
     enabled: bool,
     team_esp: bool,
-    default_enemy_color: [GLubyte; 3],
     enemy_color: [GLubyte; 3],
-    default_team_color: [GLubyte; 3],
     team_color: [GLubyte; 3],
 }
 
@@ -30,18 +28,16 @@ impl ESPBox {
             enabled: false,
             team_esp: true,
             enemy_color: default_enemy_color,
-            default_enemy_color: default_enemy_color,
             team_color: default_team_color,
-            default_team_color: default_team_color
         }
     }
 
 
     // calculates the distance between to enemies
-    fn distance(&self, player: &mut Player, enemy: &Enemy, mem: &mut Internal) -> f32 {
+    fn distance(&self, player: &Player, client: &Player) -> f32 {
         let vector = {
             let player_pos = player.get_xyz();
-            let enem_pos = enemy.get_pos(mem);
+            let enem_pos = client.get_xyz();
             let x = player_pos[0] - enem_pos[0];
             let y = player_pos[1] - enem_pos[1];
             let z = player_pos[2] - enem_pos[2];
@@ -64,16 +60,16 @@ impl ESPBox {
     }
 
     // draws an ESP box relative to the player position
-    pub fn draw_box(&self, enemy: &Enemy, player: &mut Player, viewports: [GLint; 4], view_matrix: &mut ViewMatrix, mem: &mut Internal) {
+    pub fn draw_box(&self, client: &Player, player: &Player, window_dimensions: (GLint, GLint), view_matrix: &ViewMatrix) {
 
-        let colors = if enemy.team(mem) != player.team() {self.enemy_color} else {self.team_color};
+        let colors = if client.get_team() != player.get_team() {self.enemy_color} else {self.team_color};
         let line_width: f32 = 0.5;
 
         // get the position of the enemy
-        let enemy_pos = enemy.get_pos(mem);
+        let client_pos = client.get_xyz();
 
         // get the corresponding 2D coordinates
-        let pos = view_matrix.world_to_screen(enemy_pos, viewports[2], viewports[3]);
+        let pos = view_matrix.world_to_screen(client_pos, window_dimensions.0, window_dimensions.1);
 
         // if the enemy is behind us, don't bother drawing
         if !pos.0 {
@@ -83,8 +79,8 @@ impl ESPBox {
         let x = pos.1;
         let y = pos.2;
 
-        let distance = self.distance(player, enemy, mem);
-        let scale = self.scale(distance, viewports[2]);
+        let distance = self.distance(player, client);
+        let scale = self.scale(distance, window_dimensions.0);
 
         let x = x - scale;
         let y = y - scale;

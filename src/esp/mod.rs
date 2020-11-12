@@ -6,11 +6,8 @@ use gl_bindings::*;
 mod matrix;
 use matrix::ViewMatrix;
 
-use crate::process::{Process, Internal, MemoryManipulator};
-use crate::{
-    Enemy,
-    Player
-};
+use crate::process::{Process};
+use crate::Player;
 
 mod ebox;
 use ebox::ESPBox;
@@ -21,10 +18,8 @@ const TEAM_ESP_COLOR: [GLubyte; 3] = [38, 217 , 50];
 
 
 pub struct ESP {
-    mem: Internal,
-    enemies_base: usize,
+    process: Process,
     player: Player,
-
     draw_friendly: bool,
     view_matrix: ViewMatrix,
     esp_box: ESPBox,
@@ -34,18 +29,17 @@ impl ESP {
 
     pub fn new(process: &Process) -> Self {
         ESP {
-            mem: process.get_mem_access().unwrap(),
-            enemies_base: process.module("linux_64_client").unwrap().base + PLAYERS_OFF,
-            player: Player::new(process),
+            player: Player::player1(process),
             esp_box: ESPBox::new(ENEMY_ESP_COLOR, TEAM_ESP_COLOR),
             view_matrix: ViewMatrix::new(process),
-            draw_friendly: true
+            draw_friendly: true,
+            process: process.clone()
         }
     }
 
     // switches the openGL mode into a 2D matrix and pushes the current state onto a stack
-    // so that we can pop it later
-    fn switch_to_2D(&self) -> [GLint; 4] {
+    // so that we can pop it later. It also returns the current window dimensions
+    fn switch_to_2D(&self) -> (GLint, GLint) {
         unsafe {
             // save the current state
             gl_bindings::glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -72,7 +66,7 @@ impl ESP {
             gl_bindings::glLoadIdentity();
             gl_bindings::glDisable(GL_DEPTH_TEST);
 
-            viewport
+            (viewport[2], viewport[3])
         }
     }
 
@@ -87,26 +81,26 @@ impl ESP {
 
     pub fn draw(&mut self) {
         // save the current GL state, switch to 2D mode and obtain the window dimenstions
-        let viewport = self.switch_to_2D();
+        let win_dimensions = self.switch_to_2D();
 
         // obtain a list of all bots
-        let enemies = Enemy::all(self.enemies_base, &mut self.mem);
+        let players = Player::players(&self.process);
 
 
 
-        for e in enemies.iter() {
+        for p in players.iter() {
             // filter out dead enemies
-            if !e.is_alive(&mut self.mem) {
+            if !p.is_alive() {
                 continue
             }
 
             // filter out drawing team mates
-            if !self.draw_friendly && e.team(&mut self.mem) == self.player.team() {
+            if !self.draw_friendly && p.get_team() == self.player.get_team() {
                 continue
             }
 
             // draw ESP boxes for the remaining
-            self.esp_box.draw_box(e, &mut self.player, viewport, &mut self.view_matrix, &mut self.mem)
+            self.esp_box.draw_box(p, &self.player, win_dimensions, &self.view_matrix)
         }
 
         self.restore();

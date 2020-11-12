@@ -10,7 +10,7 @@ use core::ffi::c_void;
 
 use super::ProcessErrors;
 
-pub fn get_executable_map(size: usize) -> Result<*mut c_void, ProcessErrors> {
+pub fn get_executable_map(size: usize) -> *mut c_void {
     let mut prot_flags = ProtFlags::empty();
     prot_flags.insert(ProtFlags::PROT_READ);
     prot_flags.insert(ProtFlags::PROT_EXEC);
@@ -25,10 +25,10 @@ pub fn get_executable_map(size: usize) -> Result<*mut c_void, ProcessErrors> {
                map_flags,           // Not backed by a file
                -1,                 // -1 explicit for no FD
                0                   // no offset required
-                ).unwrap()
+                ).expect("Failed to allocate executable map for shellcode")
     };
 
-    Ok(rw_page)
+    rw_page
 }
 
 

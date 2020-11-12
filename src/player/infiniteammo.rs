@@ -1,4 +1,4 @@
-use crate::{Process, MemoryManipulator, ProcMem};
+use crate::{Process, ProcMem};
 
 const AMMO_PATCH_OFF: usize = 0xbf50b;
 
@@ -18,7 +18,7 @@ impl InfiniteAmmo {
             patch_addr: process.module("linux_64_client").unwrap().base + AMMO_PATCH_OFF,
             enabled: false,
             saved_instr: None,
-            mem: process.get_mem_access().expect("Failed to get access to /proc/self/mem")
+            mem: ProcMem::init()
         }
     }
 

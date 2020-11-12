@@ -5,7 +5,8 @@
  * the file enemies.cpp is a C wrapper that fills an array of pointers to enemies for us
  */
 
-use crate::{Process, Internal, MemoryManipulator};
+use crate::{Process, InternalMemory};
+use crate::internal::InternalMemory;
 
 
 const MAX_PLAYERS: usize = 32;
@@ -17,15 +18,7 @@ const STATE_OFF: usize = 0x86;
 
 const CS_ALIVE: u8 = 0;
 
-// AssaultCube has a custom vector for the enemies. We have a pointer to this
-// struct so we can just deref it
-#[repr(C)]
-#[derive(Clone, Copy)]
-struct AcVector {
-    enemy_addresses: usize, // pointer to the buffer of pointers to the enemies
-    capacity: i32,          // max size of the buffer
-    elements: i32           // how many elements there actually are
-}
+
 
 #[derive(Clone, Copy)]
 pub struct Enemy {
@@ -39,20 +32,7 @@ impl Enemy {
             (*vec_ptr)
         };
 
-        let mut enems = Vec::with_capacity(MAX_PLAYERS);
 
-        // fill the vector of enemies
-        for i in 0..vec_of_enems.elements {
-            let enem_addr: u64 = mem.read(vec_of_enems.enemy_addresses + (i * 8) as usize);
-
-            // sometimes pointers are NULL
-            if enem_addr == 0x0 {
-                continue;
-            }
-            enems.push(Enemy {
-                base: enem_addr as usize
-            });
-        }
 
         enems
     }

@@ -77,8 +77,4 @@ impl Process {
 	pub fn modules(&self) -> Result<HashMap<String, Module>, ProcessErrors> {
 		modules::parse_modules(self)
 	}
-
-	pub fn get_mem_access<M: MemoryManipulator>(&self) -> Result<M, MemoryError> {
-		M::init(self)
-	}
 }

@@ -33,9 +33,6 @@ use ctor::ctor;
 mod player;
 use player::Player;
 
-mod enemies;
-use enemies::Enemy;
-
 mod aimbot;
 use aimbot::AimBot;
 
@@ -43,6 +40,8 @@ mod esp;
 use esp::ESP;
 
 use std::collections::HashMap;
+use player::GodMode;
+use crate::player::InfiniteAmmo;
 
 mod helpers;
 
@@ -53,6 +52,10 @@ static mut SDL_DYLIB: Option<libloading::Library> = None;
 struct AcHack {
     /// Exposes an interface to interact with the AC player struct
     pub player: Player,
+
+    pub god_mode: GodMode,
+
+    pub infinite_ammo: InfiniteAmmo,
 
     /// Used to configure the aimbot
     pub aimbot: AimBot,
@@ -66,11 +69,13 @@ impl AcHack {
     fn new() -> Self {
         // get a handle to the current process
         let process = Process::current().unwrap();
-
+        let player = Player::player1(&process);
         AcHack {
-            player: Player::new(&process),
             aimbot: AimBot::new(&process),
             esp: ESP::new(&process),
+            god_mode: GodMode::new(&process, player.base),
+            infinite_ammo: InfiniteAmmo::new(&process),
+            player,
         }
     }
 
@@ -80,11 +85,10 @@ impl AcHack {
         let mut hack = Self::new();
 
         // all the following are default settings for this hack
-        hack.aimbot.toggle();
         hack.aimbot.norecoil_spread.toggle();
         hack.aimbot.autoshoot.toggle();
-        hack.player.infinite_ammo.toggle();
-        hack.player.god_mode.toggle();
+        hack.infinite_ammo.toggle();
+        hack.god_mode.toggle();
 
         hack
     }

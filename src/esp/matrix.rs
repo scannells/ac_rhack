@@ -3,7 +3,7 @@
  *
 */
 
-use crate::process::{Process, Internal, MemoryManipulator};
+use crate::process::{Process, InternalMemory};
 
 const PLAYER_VIEW_OFF: usize = 0x13745c;
 const VIEW_MATRIX_OFF: usize = PLAYER_VIEW_OFF - 0x80;
@@ -38,18 +38,16 @@ impl Vec3 {
 
 pub struct ViewMatrix {
     base: usize,
-    mem: Internal
 }
 
 impl ViewMatrix {
     pub fn new(process: &Process) -> Self {
         ViewMatrix {
             base: process.module("linux_64_client").unwrap().base + VIEW_MATRIX_OFF,
-            mem: process.get_mem_access().unwrap()
         }
     }
 
-    fn read_matrix(&mut self) -> [[f32; 4]; 4] {
+    fn read_matrix(&self) -> [[f32; 4]; 4] {
         let mut ret = [[0.0f32, 0.0, 0.0, 0.0]; 4];
         let mut row = 0;
         let mut col = 0;
@@ -58,14 +56,14 @@ impl ViewMatrix {
                 col = 0;
                 row += 1;
             }
-            ret[row][col] = self.mem.read(self.base + i * 4);
+            ret[row][col] = InternalMemory::read(self.base + i * 4);
             col += 1;
         }
 
         ret
     }
 
-    pub fn world_to_screen(&mut self, worldpos: Pos, width: i32, height: i32) -> (bool, f32, f32) {
+    pub fn world_to_screen(&self, worldpos: Pos, width: i32, height: i32) -> (bool, f32, f32) {
         let matrix = self.read_matrix();
 
         let pos = Vec3::from(worldpos);

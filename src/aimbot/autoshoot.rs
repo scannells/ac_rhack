@@ -1,6 +1,6 @@
 use core::ffi::c_void;
 
-use crate::{Process, MemoryManipulator, ProcMem};
+use crate::{Process, ProcMem};
 
 use crate::helpers::{get_executable_map, gen_shellcode};
 
@@ -45,7 +45,7 @@ impl AutoShoot {
         AutoShoot {
             patch_addr: process.module("linux_64_client").unwrap().base + CROSSHAIR_OFF,
             enabled: false,
-            mem: process.get_mem_access().unwrap(),
+            mem: ProcMem::init(),
             page: None,
             player_base: player_base,
             patch_shellcode: None,
@@ -68,7 +68,7 @@ impl AutoShoot {
              *    that is followed by some padding. If we overwrite the padding, we can jump
              *    to our shellcode
             */
-            self.page = Some(get_executable_map(4096).unwrap());
+            self.page = Some(get_executable_map(4096));
 
             // TODO: Add team check
             let shellcode = format!(

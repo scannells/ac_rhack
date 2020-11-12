@@ -1,4 +1,4 @@
-use crate::{Process, MemoryManipulator, ProcMem};
+use crate::{Process, ProcMem};
 
 const RECOIL_PATCH_OFF: usize = 0xbd220;
 
@@ -18,7 +18,7 @@ impl NoRecoilSpread {
             patch_addr: process.module("linux_64_client").unwrap().base + RECOIL_PATCH_OFF,
             enabled: false,
             saved_instr: None,
-            mem: process.get_mem_access().unwrap(),
+            mem: ProcMem::init()
         }
     }
 

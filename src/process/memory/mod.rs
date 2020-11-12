@@ -1,13 +1,58 @@
 
+use std::path::Path;
+use std::io::prelude::*;
+use std::fs::{OpenOptions, File};
+use std::io::SeekFrom;
+
 mod memdata;
 pub use memdata::MemData;
 
-pub trait MemoryManipulator {
-	fn init(process: &super::Process) -> Result<Self, MemoryError> where Self: Sized;
-	fn write<T: MemData>(&mut self, addr: usize, data: T);
-	fn read<T: MemData + Copy>(&mut self, addr: usize) -> T;
+use crate::Process;
 
-	fn write_n(&mut self, addr: usize, data: &[u8]) {
+
+/// A wrapper for writing / reading memory through /proc/mem. This is needed when
+/// trying to write to a r-x page for example, as this method bypasses rwx protections.
+pub struct ProcMem {
+	handle: File,
+}
+
+impl ProcMem {
+	pub fn init() -> Self {
+		let process = Process::current().unwrap();
+		let mempath = format!("{}/mem", &process.proc_dir);
+		let mempath = Path::new(&mempath);
+		let memhandle = OpenOptions::new()
+			.read(true)
+			.write(true)
+			.open(mempath)
+			.expect("Could not open /proc/self/mem for memory operations");
+
+		ProcMem {
+			handle: memhandle
+		}
+	}
+
+	pub fn write<T: MemData>(&mut self, addr: usize, data: T) {
+		self.handle.seek(SeekFrom::Start(addr as u64))
+			.expect("Could not seek /proc/self/mem file");
+
+		self.handle.write(&data.get_vec())
+			.expect("Could not write to /proc/self/mem file");
+	}
+
+	pub fn read<T: MemData + Copy>(&mut self, addr: usize) -> T {
+		self.handle.seek(SeekFrom::Start(addr as u64))
+			.expect("Could not seek /proc/self/mem file");
+
+		let mut _buf = T::make_buf();
+		let bread = self.handle.read(&mut _buf)
+			.expect("Could not read from /proc/self/mem file");
+
+		T::from_vec(&_buf)
+	}
+
+	// a basic memcpy() for larger data buffers. This is called when copying shellcode
+	pub fn write_n(&mut self, addr: usize, data: &[u8]) {
 		let mut rest = data.len();
 		let mut curr = 0;
 		while rest != 0 {
@@ -36,16 +81,25 @@ pub trait MemoryManipulator {
 			curr += size;
 		}
 	}
-
 }
 
-// export linux external process memory manipulation
-mod procmem;
-pub use procmem::ProcMem;
+/// a wrapper for reading and writing dynamic data through pointers
+#[derive(Clone)]
+pub struct InternalMemory {}
 
-// 'internal' memory manipulation is just a wrapper for pointers and works on all OS
-mod internal;
-pub use internal::Internal;
+
+impl InternalMemory {
+	pub fn write<T: MemData>(addr: usize, data: T) {
+		let ptr: *mut T = addr as *mut T;
+		unsafe { *ptr = data };
+	}
+
+	pub fn read<T: MemData + Copy>(addr: usize)  -> T {
+		let ptr: *const T = addr as *const T;
+		let ret: T = unsafe { *ptr };
+		ret
+	}
+}
 
 #[derive(Debug)]
 pub enum MemoryError {

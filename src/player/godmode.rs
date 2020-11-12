@@ -1,6 +1,6 @@
 use core::ffi::c_void;
 
-use crate::{Process, MemoryManipulator, ProcMem};
+use crate::{Process, ProcMem};
 
 use crate::helpers::{get_executable_map, gen_shellcode};
 
@@ -44,7 +44,7 @@ impl GodMode {
             patch_addr: process.module("linux_64_client").unwrap().base + DAMAGE_PATCH_OFF,
             enabled: false,
             saved_instr: None,
-            mem: process.get_mem_access().expect("This hack requires access to /proc/self/mem"),
+            mem: ProcMem::init(),
             page: None,
             player_base: player_base,
             patch_shellcode: None,
@@ -72,7 +72,7 @@ impl GodMode {
              *    this means the shellcode we will jump to has to include these instructions and
              *    set and return the registers cleanly so that no difference is made
             */
-            self.page = Some(get_executable_map(4096).unwrap());
+            self.page = Some(get_executable_map(4096));
 
             // TODO: Check if the bot is an enemy
             let shellcode = format!(

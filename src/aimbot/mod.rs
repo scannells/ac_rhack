@@ -1,9 +1,7 @@
-use crate::process::{Process, Internal, MemoryManipulator};
+use crate::process::{Process};
 
 mod norecoil;
 use norecoil::NoRecoilSpread;
-
-use crate::enemies::Enemy;
 
 mod autoshoot;
 use autoshoot::AutoShoot;
@@ -17,21 +15,17 @@ pub struct AimBot {
     pub norecoil_spread: NoRecoilSpread,
     pub autoshoot: AutoShoot,
     enabled: bool,
-    enemies_base: usize,
-    mem: Internal,
 }
 
 
 impl AimBot {
     pub fn new(process: &Process) -> AimBot {
-        let mut player = Player::new(process);
+        let mut player = Player::player1(process);
         AimBot {
             autoshoot: AutoShoot::new(process, player.base),
             player: player,
             norecoil_spread: NoRecoilSpread::new(process),
             enabled: false,
-            enemies_base: process.module("linux_64_client").unwrap().base + PLAYERS_OFF,
-            mem: process.get_mem_access().unwrap()
         }
     }
 
@@ -49,9 +43,5 @@ impl AimBot {
         } else {
             self.enable();
         }
-    }
-
-    pub fn enemies(&mut self) -> Vec<Enemy> {
-        Enemy::all(self.enemies_base, &mut self.mem)
     }
 }
