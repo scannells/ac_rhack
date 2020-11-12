@@ -24,3 +24,4 @@ pub fn game_base() -> usize {
         GAME_BASE.unwrap()
     }
 }
+

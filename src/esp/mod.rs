@@ -3,9 +3,6 @@
 mod gl_bindings;
 use gl_bindings::*;
 
-mod matrix;
-use matrix::ViewMatrix;
-
 
 use crate::Player;
 
@@ -97,5 +94,15 @@ impl ESP {
         }
 
         self.restore();
+    }
+
+    // can be used by other modules to get information about the window
+    pub fn window_dimensions() -> (i32, i32) {
+        let mut viewport: [GLint; 4] = [0; 4];
+        unsafe {
+            let viewport_ptr = &mut viewport[0] as *mut GLint;
+            gl_bindings::glGetIntegerv(GL_VIEWPORT, viewport_ptr);
+        };
+        (viewport[2], viewport[3])
     }
 }

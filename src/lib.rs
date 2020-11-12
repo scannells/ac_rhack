@@ -83,6 +83,7 @@ impl AcHack {
         let mut hack = Self::new();
 
         // all the following are default settings for this hack
+        hack.aimbot.enable();
         hack.aimbot.norecoil_spread.toggle();
         hack.aimbot.autoshoot.toggle();
         hack.infinite_ammo.toggle();
@@ -194,6 +195,7 @@ pub extern "C" fn SDL_GL_SwapBuffers() -> i64 {
     hack.esp.draw();
 
     // handle aimbot logic
+    hack.aimbot.logic();
 
 
     // call the real SDL_GL_SwapBuffers() to render the frame and continue with the logic

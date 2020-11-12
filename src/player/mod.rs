@@ -4,8 +4,8 @@ pub use godmode::GodMode;
 
 mod infiniteammo;
 pub use infiniteammo::InfiniteAmmo;
-use crate::InternalMemory;
-use crate::util::{game_base, Vec3};
+use crate::{InternalMemory, ESP};
+use crate::util::{game_base, Vec3, ViewMatrix};
 
 /// offset to the player1 pointer from the base of the loaded game
 const PLAYER1_OFF: usize = 0x128328;
@@ -124,6 +124,13 @@ impl Player {
 		}
 
 		Vec3::from(view)
+	}
+
+	/// returns true if a player is in view
+	pub fn is_in_view(&self) -> bool {
+		let pos = self.get_pos();
+		let (window_width, window_height) = ESP::window_dimensions();
+		ViewMatrix::new().world_to_screen(pos, window_width, window_height).0
 	}
 
 }
