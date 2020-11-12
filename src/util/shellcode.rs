@@ -8,7 +8,6 @@ use nix::sys::mman::{mmap, ProtFlags, MapFlags};
 
 use core::ffi::c_void;
 
-use super::ProcessErrors;
 
 pub fn get_executable_map(size: usize) -> *mut c_void {
     let mut prot_flags = ProtFlags::empty();

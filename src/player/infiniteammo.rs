@@ -1,4 +1,5 @@
-use crate::{Process, ProcMem};
+use crate::{ProcMem};
+use crate::util::game_base;
 
 const AMMO_PATCH_OFF: usize = 0xbf50b;
 
@@ -13,9 +14,9 @@ pub struct InfiniteAmmo {
 }
 
 impl InfiniteAmmo {
-    pub fn new(process: &Process) -> Self {
+    pub fn new() -> Self {
         InfiniteAmmo {
-            patch_addr: process.module("linux_64_client").unwrap().base + AMMO_PATCH_OFF,
+            patch_addr: game_base() + AMMO_PATCH_OFF,
             enabled: false,
             saved_instr: None,
             mem: ProcMem::init()

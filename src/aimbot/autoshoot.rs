@@ -1,10 +1,9 @@
 use core::ffi::c_void;
 
-use crate::{Process, ProcMem};
+use crate::{ProcMem};
 
-use crate::helpers::{get_executable_map, gen_shellcode};
-
-use crate::player::Player;
+use crate::{get_executable_map, gen_shellcode};
+use crate::util::game_base;
 
 /* Autoshoot works by hooking the AC function "playerincrosshair".
  * This function takes in the current view of the player and returns a pointer
@@ -19,7 +18,10 @@ use crate::player::Player;
  * jmp rax
  */
 
+/// offset to the "playerincrosshair" function
 const CROSSHAIR_OFF: usize = 0xbad63;
+
+/// offset to the ->attacking field. When set, the player will shoot
 const PLAYER_ATTACKING_OFF: usize = 0x23c;
 
 pub struct AutoShoot {
@@ -41,9 +43,9 @@ pub struct AutoShoot {
 }
 
 impl AutoShoot {
-    pub fn new(process: &Process, player_base: usize) -> Self {
+    pub fn new(player_base: usize) -> Self {
         AutoShoot {
-            patch_addr: process.module("linux_64_client").unwrap().base + CROSSHAIR_OFF,
+            patch_addr: game_base() + CROSSHAIR_OFF,
             enabled: false,
             mem: ProcMem::init(),
             page: None,

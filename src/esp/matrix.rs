@@ -3,47 +3,22 @@
  *
 */
 
-use crate::process::{Process, InternalMemory};
+use crate::InternalMemory;
+use crate::util::{game_base, Vec3};
 
 const PLAYER_VIEW_OFF: usize = 0x13745c;
 const VIEW_MATRIX_OFF: usize = PLAYER_VIEW_OFF - 0x80;
 //const VIEW_MATRIX_OFF: usize = 0x13739c;
 
-type Pos = [f32; 3];
-
-#[derive(Debug)]
-struct Vec3 {
-    x: f32,
-    y: f32,
-    z: f32
-}
-
-impl Vec3 {
-    fn from(pos: Pos) -> Self {
-        Vec3 {
-            x: pos[0],
-            y: pos[1],
-            z: pos[2],
-        }
-    }
-
-    fn empty() -> Self {
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-        }
-    }
-}
 
 pub struct ViewMatrix {
     base: usize,
 }
 
 impl ViewMatrix {
-    pub fn new(process: &Process) -> Self {
+    pub fn new() -> Self {
         ViewMatrix {
-            base: process.module("linux_64_client").unwrap().base + VIEW_MATRIX_OFF,
+            base: game_base() + VIEW_MATRIX_OFF,
         }
     }
 
@@ -63,10 +38,9 @@ impl ViewMatrix {
         ret
     }
 
-    pub fn world_to_screen(&self, worldpos: Pos, width: i32, height: i32) -> (bool, f32, f32) {
+    pub fn world_to_screen(&self, pos: Vec3, width: i32, height: i32) -> (bool, f32, f32) {
         let matrix = self.read_matrix();
 
-        let pos = Vec3::from(worldpos);
         let screen_x = (pos.x * matrix[0][0]) + (pos.y * matrix[1][0]) + (pos.z * matrix[2][0]) + matrix[3][0];
         let screen_y = (pos.x * matrix[0][1]) + (pos.y * matrix[1][1]) + (pos.z * matrix[2][1]) + matrix[3][1];
         let screen_z = (pos.x * matrix[0][2]) + (pos.y * matrix[1][2]) + (pos.z * matrix[2][2]) + matrix[3][2];
@@ -81,8 +55,8 @@ impl ViewMatrix {
         ndc.y = screen_y / screen_w;
         ndc.z = screen_z / screen_w;
 
-        let x = ((width as f32 / 2.0 * ndc.x) + (ndc.x + width as f32 / 2.0));
-        let y = (-(height as f32 / 2.0 * ndc.y) + (ndc.y + height as f32 / 2.0));
+        let x = (width as f32 / 2.0 * ndc.x) + (ndc.x + width as f32 / 2.0);
+        let y = -(height as f32 / 2.0 * ndc.y) + (ndc.y + height as f32 / 2.0);
 
         (true, x ,y)
     }

@@ -45,7 +45,7 @@ impl ProcMem {
 			.expect("Could not seek /proc/self/mem file");
 
 		let mut _buf = T::make_buf();
-		let bread = self.handle.read(&mut _buf)
+		self.handle.read(&mut _buf)
 			.expect("Could not read from /proc/self/mem file");
 
 		T::from_vec(&_buf)
@@ -56,26 +56,25 @@ impl ProcMem {
 		let mut rest = data.len();
 		let mut curr = 0;
 		while rest != 0 {
-			let mut size = 0;
-			if rest % 8 == 0 {
-				let bytes = u64::from_vec(&Vec::from(&data[curr..curr + 8]));
-				self.write(addr + curr, bytes);
-				size = 8;
-			}
-			else if rest % 4 == 0 {
-				let bytes = u32::from_vec(&Vec::from(&data[curr..curr + 4]));
-				self.write(addr + curr, bytes);
-				size = 4;
-			}
-			else if rest % 2 == 0 {
-				let bytes = u16::from_vec(&Vec::from(&data[curr..curr + 2]));
-				self.write(addr + curr, bytes);
-				size = 2;
-			} else {
-				let bytes = data[curr];
-				self.write(addr + curr, bytes);
-				size = 1;
-			}
+			let size = {
+				if rest % 8 == 0 {
+					let bytes = u64::from_vec(&Vec::from(&data[curr..curr + 8]));
+					self.write(addr + curr, bytes);
+					8
+				} else if rest % 4 == 0 {
+					let bytes = u32::from_vec(&Vec::from(&data[curr..curr + 4]));
+					self.write(addr + curr, bytes);
+					4
+				} else if rest % 2 == 0 {
+					let bytes = u16::from_vec(&Vec::from(&data[curr..curr + 2]));
+					self.write(addr + curr, bytes);
+					2
+				} else {
+					let bytes = data[curr];
+					self.write(addr + curr, bytes);
+					1
+				}
+			};
 
 			rest -= size;
 			curr += size;

@@ -1,5 +1,3 @@
-use crate::process::{Process};
-
 mod norecoil;
 use norecoil::NoRecoilSpread;
 
@@ -7,8 +5,6 @@ mod autoshoot;
 use autoshoot::AutoShoot;
 
 use crate::player::Player;
-
-const PLAYERS_OFF: usize = 0x128330;
 
 pub struct AimBot {
     player: Player,
@@ -19,14 +15,23 @@ pub struct AimBot {
 
 
 impl AimBot {
-    pub fn new(process: &Process) -> AimBot {
-        let mut player = Player::player1(process);
+    pub fn new() -> AimBot {
+        let player = Player::player1();
         AimBot {
-            autoshoot: AutoShoot::new(process, player.base),
-            player: player,
-            norecoil_spread: NoRecoilSpread::new(process),
+            autoshoot: AutoShoot::new(player.base),
+            player,
+            norecoil_spread: NoRecoilSpread::new(),
             enabled: false,
         }
+    }
+
+    pub fn logic(&self) {
+        // don't to anything if the aimbot is disabled
+        if !self.enabled {
+            return
+        }
+
+        // we need to get the closest enemy
     }
 
     pub fn enable(&mut self) {

@@ -17,33 +17,32 @@
  *  The reason we use statics here is that we don't want to reload the entire hack
  *  for each frame
  */
-
-
 use std::thread;
 use std::time::Duration;
 
 extern crate libloading;
-
-mod process;
-pub use process::*;
-
 extern crate ctor;
 use ctor::ctor;
 
-mod player;
-use player::Player;
 
-mod aimbot;
-use aimbot::AimBot;
+// include all the different sub modules of this hack as pub for the documentation
+pub mod process;
+pub mod player;
+pub mod aimbot;
+pub mod esp;
+pub mod util;
 
-mod esp;
-use esp::ESP;
+// make all their symbols available to the other submodules through 'crate::'
+use esp::*;
+use aimbot::*;
+use player::*;
+use process::*;
+use util::*;
 
-use std::collections::HashMap;
 use player::GodMode;
 use crate::player::InfiniteAmmo;
 
-mod helpers;
+
 
 static mut AC_HACK: Option<AcHack> = None;
 static mut SDL_DYLIB: Option<libloading::Library> = None;
@@ -68,13 +67,12 @@ impl AcHack {
     /// Creates a new instance of the AcHack struct
     fn new() -> Self {
         // get a handle to the current process
-        let process = Process::current().unwrap();
-        let player = Player::player1(&process);
+        let player = Player::player1();
         AcHack {
-            aimbot: AimBot::new(&process),
-            esp: ESP::new(&process),
-            god_mode: GodMode::new(&process, player.base),
-            infinite_ammo: InfiniteAmmo::new(&process),
+            aimbot: AimBot::new(),
+            esp: ESP::new(),
+            god_mode: GodMode::new(),
+            infinite_ammo: InfiniteAmmo::new(),
             player,
         }
     }
@@ -101,8 +99,8 @@ fn load() {
 
     // Check if the current process has a linux_64_client module (the main AC binary)
     // otherwise don't load the cheat here
-    let process = Process::current().unwrap();
-    if let Err(e) = process.module("linux_64_client") {
+    let process = Process::current().expect("Could not use /proc to obtain process information");
+    if let Err(_e) = process.module("linux_64_client") {
         return;
     }
 
@@ -170,13 +168,16 @@ fn forward_to_orig_sdl_swap_buffers() -> i64 {
     }
 }
 
-// this is the "main" function of this cheat
-// SDL_GL_SwapBuffers() is called by the game for each frame that is generated
-// for this reason we outsourced initialization to load time of this library and use a global
-// variable for the main AC structure
+/// This is the "main" function of this cheat.
+/// SDL_GL_SwapBuffers() is called by the game for each frame that is generated
+/// for this reason we outsourced initialization to load time of this library and use a global
+/// variable for the main AC structure
 #[no_mangle]
 pub extern "C" fn SDL_GL_SwapBuffers() -> i64 {
-    let mut hack = unsafe {
+
+    // Rust falsely detects this as an unused mutable
+    #![allow(unused_mut)]
+    let hack = unsafe {
         &mut AC_HACK
     };
 
@@ -188,8 +189,14 @@ pub extern "C" fn SDL_GL_SwapBuffers() -> i64 {
     let mut hack = hack.as_mut().unwrap();
 
     // here comes the logic of the hack
+
+    // handle ESP logic
     hack.esp.draw();
 
+    // handle aimbot logic
+
+
+    // call the real SDL_GL_SwapBuffers() to render the frame and continue with the logic
     forward_to_orig_sdl_swap_buffers()
 }
 

@@ -41,25 +41,14 @@ pub enum ProcessErrors {
 	/// A process became invalid (e.g. it exited)
 	ProcInvalid,
 
-	/// A memory read/write operation was attempted without the mem handle being initialized
-	MemhandleUninitialized,
-
 	/// When a PID or exe name could not be linked to a valid process
 	NotFound,
 	
 	/// Permissions are insufficient to get access to the target process
 	Permissions,
 
-	/// Trying to inject into a process which does not have libc dynamically loaded
-	NoLibc,
-
 	/// Failed to open a file backing a module
 	ModuleFileErr,
-
-	/// ptrace() failed for an unknown reason
-	Ptrace,
-
-	Other,
 }
 
 

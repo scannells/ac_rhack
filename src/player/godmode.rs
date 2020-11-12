@@ -1,8 +1,9 @@
 use core::ffi::c_void;
 
-use crate::{Process, ProcMem};
+use crate::{ProcMem, Player};
 
-use crate::helpers::{get_executable_map, gen_shellcode};
+use crate::{get_executable_map, gen_shellcode};
+use crate::util::game_base;
 
 /* Enabling gode mode works by patching the instruction that writes to the health of a
  * player. We can't just add a NOP here, as that would mean no one can die anymore.
@@ -39,14 +40,14 @@ pub struct GodMode {
 }
 
 impl GodMode {
-    pub fn new(process: &Process, player_base: usize) -> Self {
+    pub fn new() -> Self {
         GodMode {
-            patch_addr: process.module("linux_64_client").unwrap().base + DAMAGE_PATCH_OFF,
+            patch_addr: game_base() + DAMAGE_PATCH_OFF,
             enabled: false,
             saved_instr: None,
             mem: ProcMem::init(),
             page: None,
-            player_base: player_base,
+            player_base: Player::player1().base,
             patch_shellcode: None,
         }
     }

@@ -1,4 +1,5 @@
-use crate::{Process, ProcMem};
+use crate::ProcMem;
+use crate::util::game_base;
 
 const RECOIL_PATCH_OFF: usize = 0xbd220;
 
@@ -13,9 +14,9 @@ pub struct NoRecoilSpread {
 }
 
 impl NoRecoilSpread {
-    pub fn new(process: &Process) -> Self {
+    pub fn new() -> Self {
         NoRecoilSpread {
-            patch_addr: process.module("linux_64_client").unwrap().base + RECOIL_PATCH_OFF,
+            patch_addr: game_base() + RECOIL_PATCH_OFF,
             enabled: false,
             saved_instr: None,
             mem: ProcMem::init()
