@@ -12,7 +12,10 @@ const MAX_PLAYERS: usize = 32;
 
 // offset to the offset of the position of an enemy relative to its base
 const PLAYER_POS_OFF: usize = 0x8;
+const TEAM_OFF: usize = 0x344;
+const STATE_OFF: usize = 0x86;
 
+const CS_ALIVE: u8 = 0;
 
 // AssaultCube has a custom vector for the enemies. We have a pointer to this
 // struct so we can just deref it
@@ -63,5 +66,14 @@ impl Enemy {
 			head[i] = mem.read(self.base + PLAYER_POS_OFF + i * 4);
 		}
 		head
+    }
+
+    pub fn is_alive(&self, mem: &mut Internal) -> bool {
+        let state: u8 = mem.read(self.base + STATE_OFF);
+        state == CS_ALIVE
+    }
+
+    pub fn team(&self, mem: &mut Internal) -> i32 {
+        mem.read(self.base + TEAM_OFF)
     }
 }

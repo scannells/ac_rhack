@@ -3,8 +3,7 @@ use crate::process::{Process, Internal, MemoryManipulator};
 mod norecoil;
 use norecoil::NoRecoilSpread;
 
-mod enemy;
-use enemy::Enemy;
+use crate::enemies::Enemy;
 
 mod autoshoot;
 use autoshoot::AutoShoot;

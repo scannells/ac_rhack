@@ -33,8 +33,15 @@ use ctor::ctor;
 mod player;
 use player::Player;
 
+mod enemies;
+use enemies::Enemy;
+
 mod aimbot;
 use aimbot::AimBot;
+
+mod esp;
+use esp::ESP;
+
 use std::collections::HashMap;
 
 mod helpers;
@@ -45,10 +52,12 @@ static mut SDL_DYLIB: Option<libloading::Library> = None;
 /// The main struct containing all the information and modules of this hack
 struct AcHack {
     /// Exposes an interface to interact with the AC player struct
-    player: Player,
+    pub player: Player,
 
     /// Used to configure the aimbot
-    aimbot: AimBot,
+    pub aimbot: AimBot,
+
+    pub esp: ESP,
 }
 
 
@@ -61,6 +70,7 @@ impl AcHack {
         AcHack {
             player: Player::new(&process),
             aimbot: AimBot::new(&process),
+            esp: ESP::new(&process),
         }
     }
 
@@ -171,9 +181,10 @@ pub extern "C" fn SDL_GL_SwapBuffers() -> i64 {
     if !hack.is_some() {
         return forward_to_orig_sdl_swap_buffers();
     }
+    let mut hack = hack.as_mut().unwrap();
 
     // here comes the logic of the hack
-
+    hack.esp.draw();
 
     forward_to_orig_sdl_swap_buffers()
 }

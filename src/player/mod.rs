@@ -16,6 +16,8 @@ const MAX_OTHER_PLAYER: usize = 32;
 const HEALTH_OFF: usize = 0x110;
 const AMMO_OFF: usize = 0x150;
 const GUNSELECT_OFF: usize = 0x120;
+const TEAM_OFF: usize = 0x344;
+const STATE_OFF: usize = 0x86;
 const PLAYER_POS_OFF: usize = 0x8;
 const PLAYER_Y_OFF: usize = 0x8 + 0x8;
 
@@ -99,6 +101,10 @@ impl Player {
 		self.mem.write(self.worldpos + 8, 5.0 as f32);
 		self.mem.write(self.worldpos, 260.0 as f32);
 	}
+
+	pub fn team(&mut self) -> i32 {
+        self.mem.read(self.base + TEAM_OFF)
+    }
 
 	pub fn shoot(&mut self) {
 		self.mem.write(self.base + PLAYER_ATTACKING_OFF, 1 as u8);
