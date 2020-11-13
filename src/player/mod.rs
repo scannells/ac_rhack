@@ -151,6 +151,7 @@ impl Player {
 		}
 	}
 
+	/// returns true if the two players are enemies
 	pub fn enemy_of(&self, other: &Player) -> bool {
 		// first, check the game mode against a list of game modes where
 		// the team does not matter
@@ -205,6 +206,7 @@ impl Player {
 		InternalMemory::write(self.base + PLAYER_ATTACKING_OFF, 1 as u8)
 	}
 
+	/// stops shooting after having started through autoshoot
 	pub fn stop_shoot(&mut self) {
 		InternalMemory::write(self.base + PLAYER_ATTACKING_OFF, 0 as u8)
 	}

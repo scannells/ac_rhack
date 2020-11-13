@@ -8,7 +8,7 @@ use nix::sys::mman::{mmap, ProtFlags, MapFlags};
 
 use core::ffi::c_void;
 
-
+/// returns a pointer to an executable page where we can copy shellcode to
 pub fn get_executable_map(size: usize) -> *mut c_void {
     let mut prot_flags = ProtFlags::empty();
     prot_flags.insert(ProtFlags::PROT_READ);

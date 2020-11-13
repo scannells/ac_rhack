@@ -3,6 +3,10 @@ use crate::util::game_base;
 
 const AMMO_PATCH_OFF: usize = 0xbf50b;
 
+/**
+ * InfiniteAmmo works by patching the instruction that subtracts the number of
+ * shot rounds from the current mag with a NOP
+ */
 pub struct InfiniteAmmo {
     patch_addr: usize,
     enabled: bool,

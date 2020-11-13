@@ -10,7 +10,7 @@ use crate::Process;
 
 static mut GAME_BASE: Option<usize> = None;
 
-
+/// returns the base address of the laoded AssaultCube process
 pub fn game_base() -> usize {
     unsafe {
         if GAME_BASE.is_none() {

@@ -1,18 +1,17 @@
-
-
+// bindgen is used to generate C bindings for libGL!
 mod gl_bindings;
 use gl_bindings::*;
-
 
 use crate::Player;
 
 mod ebox;
 use ebox::ESPBox;
 
+// some RGB values
 const ENEMY_ESP_COLOR: [GLubyte; 3] = [252, 18 , 10];
 const TEAM_ESP_COLOR: [GLubyte; 3] = [38, 217 , 50];
 
-
+/// COnfigures and handles ESP logic
 pub struct ESP {
     player: Player,
     esp_box: ESPBox,
@@ -20,6 +19,7 @@ pub struct ESP {
 
 impl ESP {
 
+    /// Creates a new ESP
     pub fn new() -> Self {
         ESP {
             player: Player::player1(),
@@ -68,7 +68,7 @@ impl ESP {
         }
     }
 
-
+    /// If enabled, draw ESP boxes
     pub fn draw(&mut self) {
         // save the current GL state, switch to 2D mode and obtain the window dimenstions
         let win_dimensions = self.switch_to_2d();
@@ -82,11 +82,11 @@ impl ESP {
                 continue
             }
 
-
             // draw ESP boxes for the remaining
             self.esp_box.draw_box(p, &self.player, win_dimensions)
         }
 
+        // go back into 3D projection mode and let the game carry on
         self.restore();
     }
 

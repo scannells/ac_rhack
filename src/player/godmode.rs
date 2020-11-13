@@ -16,7 +16,6 @@ use crate::util::game_base;
  * We will patch this instruction and some instructions around it to jump to that page and then
  * restore registers
  */
-
 const DAMAGE_PATCH_OFF: usize = 0x1c2e6;
 const HOOK_SIZE: usize = 16;
 

@@ -12,7 +12,7 @@ pub struct Vec3 {
 
 
 impl Vec3 {
-
+    /// Creates a 3D point from raw float values
     pub fn from(pos: [f32; 3]) -> Self {
         Self {
             x: pos[0],
@@ -21,6 +21,7 @@ impl Vec3 {
         }
     }
 
+    /// Returns the eclidian distance between to points
     pub fn distance(a: Vec3, b: Vec3) -> f32 {
         let vector = a - b;
 
@@ -32,6 +33,7 @@ impl Vec3 {
         )
     }
 }
+
 
 impl Sub for Vec3 {
     type Output = Self;
@@ -46,9 +48,10 @@ impl Sub for Vec3 {
 }
 
 
+/// Offset to the point the player looks at
 const PLAYER_VIEW_OFF: usize = 0x13745c;
+/// Offset to the view matrix (relative to the player view)
 const VIEW_MATRIX_OFF: usize = PLAYER_VIEW_OFF - 0x80;
-//const VIEW_MATRIX_OFF: usize = 0x13739c;
 
 
 // Thanks to GuidedHacking for this W2S function
