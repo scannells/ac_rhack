@@ -25,6 +25,27 @@ This software contains no Assault Cube intellectual property, and is not affilia
 
 ### Building
 
+The build system of this cheat is cargo. External library dependencies are libGL headers and libSDL.
+
+On Ubuntu, you can install all prerquisites with:
+
+```bash
+#/bin/bash
+# install openGL header files
+sudo apt install libgl-dev -y
+
+# you will probably need to install libSDL-image to run the game
+sudo apt-install libsdl-image1.2-dev -y
+```
+
+My `rustc` and cargo versions at the time of building where `cargo 1.47.0 (f3c7e066a 2020-08-28)` and
+`rustc 1.47.0 (18bf6b4f0 2020-10-07)`. The build can file when using versions previous to `1.47.*`.
+
+Then, simply run
+
+```bash
+cargo build --release
+```
 
 
 ### Loading the cheat
@@ -51,3 +72,14 @@ binary and at the time of writing, these are the file hashes for it:
 
 It matters to execute that version, as offsets will be invalidated by future updates.
 
+
+
+## Documentation
+
+A documentation can be generated via
+
+```bash
+cargo doc
+```
+
+Alternatively, just read the source code. I made lots of comments.
