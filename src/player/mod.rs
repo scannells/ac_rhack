@@ -6,7 +6,6 @@ mod infiniteammo;
 pub use infiniteammo::InfiniteAmmo;
 use crate::{InternalMemory, ESP};
 use crate::util::{game_base, Vec3, ViewMatrix};
-use crate::player::GameModes::GmodeBotOneShotOneKill;
 
 /// offset to the player1 pointer from the base of the loaded game
 const PLAYER1_OFF: usize = 0x128328;
@@ -143,15 +142,13 @@ impl Player {
 
 	fn is_free_for_all() -> bool {
 		let gamemode = Self::get_gamemode();
-		let mut is_ffa = false;
 		match gamemode {
-			GameModes::GmodeBotDeathMatch => is_ffa = true,
-			GameModes::GmodeBotOneShotOneKill => is_ffa = true,
-			GameModes::GmodeBotSurvivor => is_ffa = true,
-			GameModes::GmodeBotlss => is_ffa = true,
-			_ => is_ffa = false
+			GameModes::GmodeBotDeathMatch => true,
+			GameModes::GmodeBotOneShotOneKill => true,
+			GameModes::GmodeBotSurvivor => true,
+			GameModes::GmodeBotlss => true,
+			_ => false
 		}
-		return is_ffa;
 	}
 
 	pub fn enemy_of(&self, other: &Player) -> bool {
