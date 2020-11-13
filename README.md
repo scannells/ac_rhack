@@ -40,8 +40,8 @@ sudo apt install libgl-dev -y
 sudo apt-install libsdl-image1.2-dev -y
 ```
 
-My `rustc` and cargo versions at the time of building where `cargo 1.47.0 (f3c7e066a 2020-08-28)` and
-`rustc 1.47.0 (18bf6b4f0 2020-10-07)`. The build can file when using versions previous to `1.47.*`.
+My `rustc` and cargo versions at the time of building were `cargo 1.47.0 (f3c7e066a 2020-08-28)` and
+`rustc 1.47.0 (18bf6b4f0 2020-10-07)`. The build can fail when using versions previous to `1.47.*`.
 
 Then, simply run
 
