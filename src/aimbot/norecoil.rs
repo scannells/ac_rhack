@@ -1,7 +1,9 @@
 use crate::ProcMem;
 use crate::util::game_base;
 
+// offset to the Recoil function
 const RECOIL_PATCH_OFF: usize = 0xbd220;
+
 
 pub struct NoRecoilSpread {
     patch_addr: usize,

@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdint.h>
 
-// call into the function, correctly.
-// this is the struct vec definition as in the AssaultCube code
+// this CPP function serves as a trampoline to call BotIsVisible() of AC
+// IsVisible() has a weird calling convention Rust can't deal with.
+// We could have used Rust inline ASM but that would require the nightly
+// rust build at the time of writing, so we just use this CPP trampoline.
 struct vec
 {
     union

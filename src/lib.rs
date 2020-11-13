@@ -9,7 +9,6 @@
  *  - prepares hooks
  *  - initialized the global AC_HACK variable
  *  - dynamically loads libSDL and obtains a pointer to the SDL_GL_SwapBuffers() function
- *  - spawns a new thread that will listen for keyboard bindings to change settings
  *
  *  By using the LD_PRELOAD technique, this hack hooks the SDL_GL_SwapBuffers() function.
  *  This function will then use the initialized, static variable AC_HACK to perform the logic
@@ -33,32 +32,36 @@ pub mod esp;
 pub mod util;
 
 // make all their symbols available to the other submodules through 'crate::'
-use esp::*;
-use aimbot::*;
-use player::*;
-use process::*;
-use util::*;
+pub use esp::*;
+pub use aimbot::*;
+pub use player::*;
+pub use process::*;
+pub use util::*;
 
-use player::GodMode;
-use crate::player::InfiniteAmmo;
-
-
-
+/// This is a static reference to the initialized hack. It is initialized at load time of the library
+/// and used for every frame of the game (SDL_GL_SwapBuffers())
 static mut AC_HACK: Option<AcHack> = None;
+
+/// a reference to the dynamiclly loaded libSDL. We use this dynamically loaded library
+/// to keep a ference to the real SDL_GL_SwapBuffers() so that the hack can call it after
+/// the hook has finished.
 static mut SDL_DYLIB: Option<libloading::Library> = None;
 
-/// The main struct containing all the information and modules of this hack
+/// The main struct containing the current configuration of the cheat
 struct AcHack {
     /// Exposes an interface to interact with the AC player struct
     pub player: Player,
 
+    /// Enables GodMode (invincible, 1-shot-1kill
     pub god_mode: GodMode,
 
+    /// Hooks the shooting function and enables infinite ammo
     pub infinite_ammo: InfiniteAmmo,
 
     /// Used to configure the aimbot
     pub aimbot: AimBot,
 
+    /// Used to configure the ESP
     pub esp: ESP,
 }
 
@@ -77,7 +80,7 @@ impl AcHack {
         }
     }
 
-    /// initializes default settings and launches a new thread that will listen for keyboard
+    /// Initializes default settings and launches a new thread that will listen for keyboard
     /// bindings
     fn init() ->Self {
         let mut hack = Self::new();
@@ -123,6 +126,7 @@ fn load() {
         }
     }
 
+    // this should not happen
     if !found {
         panic!("Could not find libSDL-1.2 in current process");
     }
@@ -133,7 +137,7 @@ fn load() {
 
 
     // Wait 5 seconds in a new thread for the game to initialize
-    // If we don't do this step, we might break something
+    // If we don't do this step, we might break something as some pointers might be uninitialized
     thread::spawn(|| {
         // Wait around 5 seconds to let the game actually load so that pointers are valid.
         thread::sleep(Duration::from_secs(5));
@@ -146,6 +150,7 @@ fn load() {
 }
 
 
+/// Calls the real SDL_GL_SwapBuffers() to render a game frame
 fn forward_to_orig_sdl_swap_buffers() -> i64 {
     // this function is always initialized as we panic in the loading function
     // if it can't be initialized
@@ -170,13 +175,11 @@ fn forward_to_orig_sdl_swap_buffers() -> i64 {
 }
 
 /// This is the "main" function of this cheat.
-/// SDL_GL_SwapBuffers() is called by the game for each frame that is generated
-/// for this reason we outsourced initialization to load time of this library and use a global
-/// variable for the main AC structure
+/// SDL_GL_SwapBuffers() is called by the game for each frame that is generated.
 #[no_mangle]
 pub extern "C" fn SDL_GL_SwapBuffers() -> i64 {
 
-    // Rust falsely detects this as an unused mutable
+    // rustc falsely detects this as an unused mutable
     #![allow(unused_mut)]
     let hack = unsafe {
         &mut AC_HACK
