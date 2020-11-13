@@ -11,9 +11,8 @@ use crate::{
 const VIRTUAL_SCREEN_WIDTH: i32 = 800;
 const GAME_UNIT_MAGIC: usize = 400;
 const PLAYER_HEIGHT: f32 = 7.25;
-const PLAYER_WIDTH: f32 = 2.5;
-//
-// const EYE_HEIGHT: f32 = 6.5;
+const PLAYER_WIDTH: f32 = 3.5;
+
 const PLAYER_ASPECT_RATIO: f32 = PLAYER_HEIGHT / PLAYER_WIDTH;
 
 pub struct ESPBox {
@@ -37,7 +36,7 @@ impl ESPBox {
     // draws an ESP box relative to the player position
     pub fn draw_box(&self, client: &Player, player: &Player, window_dimensions: (GLint, GLint)) {
 
-        let colors = if client.get_team() != player.get_team() {self.enemy_color} else {self.team_color};
+        let colors = if player.enemy_of(client) {self.enemy_color} else {self.team_color};
         let line_width: f32 = 0.5;
 
         // get the position of the enemy

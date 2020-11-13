@@ -15,7 +15,6 @@ const TEAM_ESP_COLOR: [GLubyte; 3] = [38, 217 , 50];
 
 pub struct ESP {
     player: Player,
-    draw_friendly: bool,
     esp_box: ESPBox,
 }
 
@@ -25,7 +24,6 @@ impl ESP {
         ESP {
             player: Player::player1(),
             esp_box: ESPBox::new(ENEMY_ESP_COLOR, TEAM_ESP_COLOR),
-            draw_friendly: true,
         }
     }
 
@@ -84,10 +82,6 @@ impl ESP {
                 continue
             }
 
-            // filter out drawing team mates
-            if !self.draw_friendly && p.get_team() == self.player.get_team() {
-                continue
-            }
 
             // draw ESP boxes for the remaining
             self.esp_box.draw_box(p, &self.player, win_dimensions)

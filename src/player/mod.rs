@@ -6,6 +6,7 @@ mod infiniteammo;
 pub use infiniteammo::InfiniteAmmo;
 use crate::{InternalMemory, ESP};
 use crate::util::{game_base, Vec3, ViewMatrix};
+use crate::player::GameModes::GmodeBotOneShotOneKill;
 
 /// offset to the player1 pointer from the base of the loaded game
 const PLAYER1_OFF: usize = 0x128328;
@@ -16,35 +17,63 @@ const PLAYERS_OFF: usize = 0x128330;
 // there can be only 32 players in a match
 const MAX_PLAYERS: usize = 32;
 
-// offsets from the playerent to fields we want to read / write
 
-/// offset from the player base to the team a player is in
+/// offset from the player base to the team field (int)
 const TEAM_OFF: usize = 0x344;
 
-/// offset from the player base to the state (alive, dead etc.) a player has
+/// offset from the player base to the state (alive, dead etc.) a player has (u8)
 const STATE_OFF: usize = 0x86;
 
-/// offset to the player position
+/// offset to the player position (an array of 3 32bit floats)
 const PLAYER_POS_OFF: usize = 0x8;
+
+const PLAYER_NEWPOS_OFF: usize = 0x38;
+const PLAYER_EYEHEIGHT_OFF: usize = 0x60;
+
+
+const GAMEMODE_OFF: usize = 0x128294;
 
 // this value represents a living player (used for aimbot / ESP)
 const ALIVE_STATE: u8 = 0;
 
-const PLAYER_VIEW_OFF: usize = 0x13745c;
 
+enum GameModes {
+	GmodeBotTeamdeathMatch = 7,
+	GmodeBotDeathMatch = 8,
+	GmodeBotOneShotOneKill = 12,
+	GmodeBotPistolFrenzy = 18,
+	GmodeBotlss = 19,
+	GmodeBotSurvivor = 20,
+	GmodeBotTeamOneShotOneKill = 21,
+}
+
+impl GameModes {
+	fn from_i32(int: i32) -> GameModes {
+		match int {
+			7 => GameModes::GmodeBotTeamdeathMatch,
+			8 => GameModes::GmodeBotDeathMatch,
+			12 => GameModes::GmodeBotOneShotOneKill,
+			18 => GameModes::GmodeBotPistolFrenzy,
+			19 => GameModes::GmodeBotlss,
+			20 => GameModes::GmodeBotSurvivor,
+			21 => GameModes::GmodeBotTeamOneShotOneKill,
+			_ => panic!("Unsupported Game mode")
+		}
+	}
+}
 
 pub struct Player {
 	pub base: usize,
 }
 
 // AssaultCube has a custom vector that holds pointers to enemies,
-// which are also Players
+// which are also Players. We use this struct to read the enemy player's positions
 #[repr(C)]
 #[derive(Clone, Copy)]
 struct AcVector {
     player_addresses: usize, // pointer to the buffer of pointers to the enemies
-    capacity: i32,          // max size of the buffer
-    elements: i32           // how many elements there actually are
+    capacity: i32,           // max size of the buffer
+    elements: i32            // how many elements there actually are
 }
 
 impl Player {
@@ -101,6 +130,52 @@ impl Player {
 		Vec3::from(head)
 	}
 
+	fn get_eyeheight(&self) -> f32 {
+		InternalMemory::read(self.base + PLAYER_EYEHEIGHT_OFF)
+	}
+
+	fn get_gamemode() -> GameModes {
+		GameModes::from_i32(
+			InternalMemory::read(game_base() + GAMEMODE_OFF)
+		)
+	}
+
+	fn is_free_for_all() -> bool {
+		let gamemode = Self::get_gamemode();
+		let mut is_ffa = false;
+		match gamemode {
+			GameModes::GmodeBotDeathMatch => is_ffa = true,
+			GameModes::GmodeBotOneShotOneKill => is_ffa = true,
+			GameModes::GmodeBotSurvivor => is_ffa = true,
+			GameModes::GmodeBotlss => is_ffa = true,
+			_ => is_ffa = false
+		}
+		return is_ffa;
+	}
+
+	pub fn enemy_of(&self, other: &Player) -> bool {
+		// first, check the game mode against a list of game modes where
+		// the team does not matter
+		if Self::is_free_for_all() {
+			return true;
+		}
+
+		self.get_team() != other.get_team()
+	}
+
+	/// returns the position a player will be located at in the next frame.
+	/// This is needed for a reliable aimbot
+	pub fn get_new_pos(&self) -> Vec3 {
+		let mut foot: [f32; 3] = [0.0; 3];
+		for i in 0..3 {
+			foot[i] = InternalMemory::read(self.base + PLAYER_NEWPOS_OFF + i * 4);
+		}
+		let mut vec = Vec3::from(foot);
+		vec.z += self.get_eyeheight();
+		vec
+	}
+
+	/// Calculates the distance between to players in a 3D space
 	pub fn distance_to(&self, other: &Player) -> f32 {
 		let self_pos = self.get_pos();
 		let other_pos = other.get_pos();
@@ -108,25 +183,19 @@ impl Player {
 		Vec3::distance(self_pos, other_pos)
 	}
 
-	pub fn get_team(&self) -> i32 {
+	/// retuns the team the player is in
+	fn get_team(&self) -> i32 {
         InternalMemory::read(self.base + TEAM_OFF)
     }
 
+
+	/// returns true if the player is alive
 	pub fn is_alive(&self) -> bool {
 		InternalMemory::read::<u8>(self.base + STATE_OFF) == ALIVE_STATE
 	}
 
-	/// returns the point to the entity the user is looking at
-	pub fn viewpoint() -> Vec3 {
-		let mut view = [0.0 as f32; 3];
-		for i in 0..3 {
-			view[i] = InternalMemory::read(game_base() + PLAYER_VIEW_OFF);
-		}
 
-		Vec3::from(view)
-	}
-
-	/// returns true if a player is in view
+	/// returns true if a player is infront of the player on the 2D screen
 	pub fn is_in_view(&self) -> bool {
 		let pos = self.get_pos();
 		let (window_width, window_height) = ESP::window_dimensions();

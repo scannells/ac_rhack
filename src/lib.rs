@@ -197,7 +197,6 @@ pub extern "C" fn SDL_GL_SwapBuffers() -> i64 {
     // handle aimbot logic
     hack.aimbot.logic();
 
-
     // call the real SDL_GL_SwapBuffers() to render the frame and continue with the logic
     forward_to_orig_sdl_swap_buffers()
 }

@@ -52,8 +52,8 @@ impl AimBot {
 
 
     fn enemy_to_angle(&self, enemy: &Player) -> (f32, f32) {
-        let target_pos = enemy.get_pos();
-        let self_pos = self.player.get_pos();
+        let target_pos = enemy.get_new_pos();
+        let self_pos = self.player.get_new_pos();
         let dx = target_pos.x - self_pos.x;
         let dy = target_pos.y - self_pos.y;
         let dz = target_pos.z - self_pos.z;
@@ -97,7 +97,7 @@ impl AimBot {
         // obtain a list of all enemies which are alive
         let players: Vec<Player> = Player::players()
             .into_iter()
-            .filter(|p| p.is_alive())
+            .filter(|p| p.is_alive() && self.player.enemy_of(p))
             .collect();
 
 
@@ -131,8 +131,11 @@ impl AimBot {
             return;
         }
 
+        // update the camera position
         InternalMemory::write(Self::camera1() + YAW_OFF, yaw);
         InternalMemory::write(Self::camera1() + PITCH_OFF, pitch);
+
+        
     }
 
     pub fn enable(&mut self) {
