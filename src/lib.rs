@@ -85,7 +85,7 @@ impl AcHack {
         // all the following are default settings for this hack
         hack.aimbot.enable();
         hack.aimbot.norecoil_spread.toggle();
-        hack.aimbot.autoshoot.toggle();
+        hack.aimbot.enable_autoshoot();
         hack.infinite_ammo.toggle();
         hack.god_mode.toggle();
 

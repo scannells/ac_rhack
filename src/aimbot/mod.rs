@@ -1,9 +1,6 @@
 mod norecoil;
 use norecoil::NoRecoilSpread;
 
-mod autoshoot;
-use autoshoot::AutoShoot;
-
 use crate::player::Player;
 use crate::process::InternalMemory;
 use crate::util::game_base;
@@ -22,7 +19,7 @@ const IS_VISIBLE_OFF: usize = 0xda520;
 pub struct AimBot {
     player: Player,
     pub norecoil_spread: NoRecoilSpread,
-    pub autoshoot: AutoShoot,
+    autoshoot: bool,
     enabled: bool,
 }
 
@@ -35,7 +32,7 @@ impl AimBot {
     pub fn new() -> AimBot {
         let player = Player::player1();
         AimBot {
-            autoshoot: AutoShoot::new(player.base),
+            autoshoot: false,
             player,
             norecoil_spread: NoRecoilSpread::new(),
             enabled: false,
@@ -48,9 +45,11 @@ impl AimBot {
         InternalMemory::read::<u64>(game_base() + CAMERA1_OFF) as usize
     }
 
+    pub fn enable_autoshoot(&mut self) {
+        self.autoshoot = true
+    }
+
     // calculates the position the player will be in the next frame when it moves
-
-
     fn enemy_to_angle(&self, enemy: &Player) -> (f32, f32) {
         let target_pos = enemy.get_new_pos();
         let self_pos = self.player.get_new_pos();
@@ -87,7 +86,13 @@ impl AimBot {
     // todo: implement locking on enemy
     /// Called after each frame by the main SwapBuffer hook. Handles findings a target
     /// to aim at and updating camera perspective
-    pub fn logic(&self) {
+    pub fn logic(&mut self) {
+
+        // stop shooting if we are not locked onto a target
+        if self.autoshoot {
+            self.player.stop_shoot();
+        }
+
         // don't to anything if the aimbot is disabled
         if !self.enabled {
             return
@@ -135,7 +140,10 @@ impl AimBot {
         InternalMemory::write(Self::camera1() + YAW_OFF, yaw);
         InternalMemory::write(Self::camera1() + PITCH_OFF, pitch);
 
-        
+
+        if self.autoshoot {
+            self.player.shoot();
+        }
     }
 
     pub fn enable(&mut self) {

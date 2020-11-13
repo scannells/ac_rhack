@@ -30,6 +30,7 @@ const PLAYER_POS_OFF: usize = 0x8;
 const PLAYER_NEWPOS_OFF: usize = 0x38;
 const PLAYER_EYEHEIGHT_OFF: usize = 0x60;
 
+const PLAYER_ATTACKING_OFF: usize = 0x23c;
 
 const GAMEMODE_OFF: usize = 0x128294;
 
@@ -200,6 +201,15 @@ impl Player {
 		let pos = self.get_pos();
 		let (window_width, window_height) = ESP::window_dimensions();
 		ViewMatrix::new().world_to_screen(pos, window_width, window_height).0
+	}
+
+	/// triggers the ->attacking state of the player to start shooting
+	pub fn shoot(&mut self) {
+		InternalMemory::write(self.base + PLAYER_ATTACKING_OFF, 1 as u8)
+	}
+
+	pub fn stop_shoot(&mut self) {
+		InternalMemory::write(self.base + PLAYER_ATTACKING_OFF, 0 as u8)
 	}
 
 }
