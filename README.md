@@ -1,7 +1,7 @@
 This basic cheat is the result of a side-project I did for fun. It is an Internal Hack for AssaultCube on Linux written in Rust.
 
 
-![alt text](https://scannell.me/wp-content/uploads/2020/11/esp_screenshot.png "Screenshot of the ESP")
+![alt text](./esp-screenshot.png "Screenshot of the ESP")
 
 ## Features
 
